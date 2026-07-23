@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Disco Admin</title>
+  <link rel="icon" href="/discoing.ico" />
+  <style>
+    :root {
+      --bg: #000000;
+      --text-main: #f5f5f7;
+      --text-subtle: #a1a1aa;
+      --btn-sheen: rgba(255, 255, 255, 0.05);
+      --btn-inner-top: rgba(255, 255, 255, 0.3);
+      --btn-inner-glow: rgba(255, 255, 255, 0.3);
+      --radius-cover: 24px;
+      --radius-button: 12px;
+      
+      --card-bg: #121214;
+      --border: rgba(255, 255, 255, 0.08);
+      --input-bg: #1e1e22;
+      --primary: #0a84ff;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f5f5f7;
+        --text-main: #111111;
+        --text-subtle: #636366;
+        --btn-sheen: rgba(255, 255, 255, 0.35);
+        --btn-inner-top: rgba(255, 255, 255, 0.6);
+        --btn-inner-glow: rgba(255, 255, 255, 0.35);
+        
+        --card-bg: #ffffff;
+        --border: rgba(0, 0, 0, 0.08);
+        --input-bg: #f5f5f7;
+        --primary: #007aff;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      margin: 0;
+      padding: 40px 20px;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 40px;
+      border-radius: var(--radius-cover);
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.28);
+    }
+
+    h1, h2 {
+      margin-top: 0;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      color: var(--text-subtle);
+      margin-bottom: 8px;
+      font-weight: 600;
+      letter-spacing: -0.012em;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--input-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-button);
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* MATCHING PILL BUTTONS WITH CLIENT GLOSSY EFFECT */
+    button {
+      border: none;
+      border-radius: 6rem;
+      padding: 0.6rem 1.4rem;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: all 0.5s ease;
+      color: #ffffff;
+      background: var(--primary);
+      text-decoration: none;
+      box-sizing: border-box;
+    }
+
+    button::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 6rem;
+      background: linear-gradient(to bottom right, var(--btn-sheen), transparent);
+      pointer-events: none;
+      mix-blend-mode: screen;
+      z-index: 100;
+    }
+
+    button::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 6rem;
+      pointer-events: none;
+      z-index: 100;
+      box-shadow: inset 0 1.54px 0 var(--btn-inner-top), inset 0 0 18px var(--btn-inner-glow);
+    }
+
+    button:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    #import-artist-itunes, #import-release-itunes {
+      background: #30d158; /* Success green */
+    }
+
+    #add-social-btn, #add-link-btn {
+      background: #8e8e93; /* Neutral gray */
+    }
+
+    .list-item button {
+      background: #ff453a; /* Danger red */
+      padding: 6px 16px;
+      font-size: 0.85rem;
+    }
+
+    .hidden { display: none !important; }
+    #auth-view { text-align: center; max-width: 400px; margin: 0 auto; }
+
+    .tabs {
+      margin-bottom: 30px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 15px;
+    }
+
+    .tab {
+      padding: 12px 8px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      color: var(--text-subtle);
+      transition: all 0.2s ease;
+      font-weight: 500;
+    }
+
+    .tab:hover {
+      color: var(--text-main);
+    }
+
+    .tab.active {
+      border-bottom-color: var(--primary);
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .list-item {
+      padding: 16px 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-button);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s ease;
+    }
+
+    .list-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="auth-view">
+      <h1>Disco Admin</h1>
+      <form id="login-form">
+        <div class="form-group">
+          <input type="password" id="password" placeholder="Admin Password" required />
+        </div>
+        <button type="submit">Login</button>
+        <p id="login-error" style="color:red;"></p>
+      </form>
+    </div>
+
+    <div id="dashboard-view" class="hidden">
+      <h1>Disco Dashboard</h1>
+      <div class="tabs">
+        <div class="tab active" data-target="artists">Artists</div>
+        <div class="tab" data-target="releases">Releases</div>
+      </div>
+      
+      <div id="artists-panel">
+        <button id="new-artist-btn" style="margin-bottom: 15px;">+ New Artist</button>
+        <div id="artists-list"></div>
+        <form id="artist-form" class="hidden" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+          <h3>Edit Artist</h3>
+          <input type="hidden" id="artist-id" />
+          <div class="form-group"><label>Name</label><input type="text" id="artist-name" required /></div>
+          <div class="form-group"><label>Slug</label><input type="text" id="artist-slug" required /></div>
+          <div class="form-group">
+            <label>Image URL</label>
+            <div style="display: flex; gap: 10px;">
+              <input type="url" id="artist-image" required />
+              <button type="button" id="import-artist-itunes" style="white-space: nowrap; background: #34c759;">Import from iTunes</button>
+            </div>
+          </div>
+          <div class="form-group"><label>Low-Res Image URL (Optional)</label><input type="url" id="artist-lowres-image" /></div>
+          <div class="form-group"><label>About</label><textarea id="artist-about" rows="4"></textarea></div>
+          <div class="form-group"><label>About Image URLs (comma separated)</label><input type="text" id="artist-about-images" /></div>
+          <div class="form-group">
+            <label>Socials</label>
+            <div id="artist-socials-builder" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px;"></div>
+            <button type="button" id="add-social-btn" style="background:#34c759; color:white; padding:5px 10px; font-size:0.9rem;">+ Add Social Link</button>
+          </div>
+          <button type="submit">Save Artist</button>
+          <button type="button" id="cancel-artist-btn" style="background:#ccc; color:#333;">Cancel</button>
+          <p id="artist-error" style="color:red;"></p>
+        </form>
+      </div>
+
+      <div id="releases-panel" class="hidden">
+        <button id="new-release-btn" style="margin-bottom: 15px;">+ New Release</button>
+        <div id="releases-list"></div>
+        <form id="release-form" class="hidden" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+          <h3>Edit Release</h3>
+          <input type="hidden" id="release-id" />
+          <div class="form-group"><label>Artist</label><select id="release-artist" required></select></div>
+          <div class="form-group"><label>Title</label><input type="text" id="release-title" required /></div>
+          <div class="form-group"><label>Slug</label><input type="text" id="release-slug" required /></div>
+          <div class="form-group"><label>Type (e.g. Album)</label><input type="text" id="release-type" required /></div>
+          <div class="form-group"><label>Year</label><input type="text" id="release-year" required /></div>
+          <div class="form-group">
+            <label>Cover URL</label>
+            <div style="display: flex; gap: 10px;">
+              <input type="url" id="release-cover" required />
+              <button type="button" id="import-release-itunes" style="white-space: nowrap; background: #34c759;">Import from iTunes</button>
+            </div>
+          </div>
+          <div class="form-group"><label>Low-Res Cover URL (Optional)</label><input type="url" id="release-lowres-cover" /></div>
+          <div class="form-group"><label>Release Date UTC</label><input type="text" id="release-date" placeholder="e.g. July 3, 2026 00:00:00" /></div>
+          <div class="form-group"><label>About</label><textarea id="release-about" rows="4"></textarea></div>
+          <div class="form-group"><label>Sticker URLs (comma separated)</label><input type="text" id="release-stickers" /></div>
+          <div class="form-group"><label>About Image URLs (comma separated)</label><input type="text" id="release-about-images" /></div>
+          <div class="form-group">
+            <label>Streaming Links</label>
+            <div id="release-links-builder" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px;"></div>
+            <button type="button" id="add-link-btn" style="background:#34c759; color:white; padding:5px 10px; font-size:0.9rem;">+ Add Streaming Link</button>
+          </div>
+          <div class="form-group"><label>Sort Order</label><input type="number" id="release-sort" value="0" /></div>
+          <button type="submit">Save Release</button>
+          <button type="button" id="cancel-release-btn" style="background:#ccc; color:#333;">Cancel</button>
+          <p id="release-error" style="color:red;"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/admin/app.js"></script>
+</body>
+</html>
