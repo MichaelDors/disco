@@ -287,8 +287,24 @@ function initInteractiveFeatures(release) {
   window.addEventListener("scroll", checkScroll, { passive: true });
   checkScroll();
 
+  function parseUtcDate(dateStr) {
+    if (!dateStr || typeof dateStr !== "string") return null;
+    const trimmed = dateStr.trim();
+    if (!trimmed) return null;
+    if (/(Z|UTC|GMT|[+-]\d{2}:?\d{2})$/i.test(trimmed)) {
+      const d = new Date(trimmed);
+      return isNaN(d.getTime()) ? null : d;
+    }
+    const utcDate = new Date(trimmed + " UTC");
+    if (!isNaN(utcDate.getTime())) {
+      return utcDate;
+    }
+    const d = new Date(trimmed);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
   // Countdown elements
-  const targetDate = release.releaseAtUtc ? new Date(release.releaseAtUtc) : null;
+  const targetDate = parseUtcDate(release.releaseAtUtc);
   const stickyCountdownEl = document.getElementById("stickyCountdown");
   const stickyCountdownCard = document.getElementById("stickyCountdownCard");
   const countdownEl = document.getElementById("countdown");
