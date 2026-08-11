@@ -86,24 +86,46 @@ tabs.forEach(tab => {
   });
 });
 
+let allReleases = [];
+const releaseArtistFilter = document.getElementById("release-artist-filter");
+
+function filterAndRenderReleases() {
+  const selectedArtistId = releaseArtistFilter ? releaseArtistFilter.value : "";
+  if (selectedArtistId) {
+    const filtered = allReleases.filter(r => r.artistId === selectedArtistId);
+    renderReleases(filtered);
+  } else {
+    renderReleases(allReleases);
+  }
+}
+
+if (releaseArtistFilter) {
+  releaseArtistFilter.addEventListener("change", filterAndRenderReleases);
+}
+
 async function loadData() {
   try {
     allArtists = await convex.query("queries:getAllArtists", {});
     renderArtists(allArtists);
 
-    // Load releases (naive: load all by iterating, in reality we'd want a getAllReleases query, but we can just use our existing ones)
-    // Actually, we need to fetch all releases. Let's add a query if it doesn't exist, or just loop artists.
-    // For now, let's fetch releases per artist to build the list.
-    let allReleases = [];
+    allReleases = [];
     for (const artist of allArtists) {
       const rels = await convex.query("queries:getReleasesByArtist", { artistId: artist._id });
       allReleases = allReleases.concat(rels.map(r => ({ ...r, artistName: artist.name })));
     }
-    renderReleases(allReleases);
 
     // Update release form artist dropdown
     const select = document.getElementById("release-artist");
     select.innerHTML = allArtists.map(a => `<option value="${a._id}">${a.name}</option>`).join("");
+
+    // Update release artist filter dropdown
+    if (releaseArtistFilter) {
+      const currentFilterVal = releaseArtistFilter.value;
+      releaseArtistFilter.innerHTML = `<option value="">All Artists</option>` + allArtists.map(a => `<option value="${a._id}">${a.name}</option>`).join("");
+      releaseArtistFilter.value = currentFilterVal;
+    }
+
+    filterAndRenderReleases();
   } catch (e) {
     console.error(e);
     if (e.message.includes("Unauthorized")) {
@@ -131,6 +153,35 @@ function createLinkRow(container, initialData = { label: "", className: "spotify
   row.style.gap = "10px";
   row.style.alignItems = "center";
   row.style.marginBottom = "5px";
+
+  const reorderGroup = document.createElement("div");
+  reorderGroup.style.display = "flex";
+  reorderGroup.style.gap = "2px";
+
+  const upBtn = document.createElement("button");
+  upBtn.type = "button";
+  upBtn.className = "reorder-btn";
+  upBtn.textContent = "▲";
+  upBtn.title = "Move Up";
+  upBtn.addEventListener("click", () => {
+    if (row.previousElementSibling) {
+      container.insertBefore(row, row.previousElementSibling);
+    }
+  });
+
+  const downBtn = document.createElement("button");
+  downBtn.type = "button";
+  downBtn.className = "reorder-btn";
+  downBtn.textContent = "▼";
+  downBtn.title = "Move Down";
+  downBtn.addEventListener("click", () => {
+    if (row.nextElementSibling) {
+      container.insertBefore(row.nextElementSibling, row);
+    }
+  });
+
+  reorderGroup.appendChild(upBtn);
+  reorderGroup.appendChild(downBtn);
 
   const select = document.createElement("select");
   select.style.width = "120px";
@@ -175,6 +226,7 @@ function createLinkRow(container, initialData = { label: "", className: "spotify
   removeBtn.style.padding = "5px 10px";
   removeBtn.addEventListener("click", () => row.remove());
 
+  row.appendChild(reorderGroup);
   row.appendChild(select);
   row.appendChild(labelInput);
   row.appendChild(urlInput);
@@ -470,7 +522,7 @@ artistForm.addEventListener("submit", async (e) => {
 });
 
 window.editRelease = (id) => {
-  const r = currentReleases.find(x => x._id === id);
+  const r = allReleases.find(x => x._id === id) || currentReleases.find(x => x._id === id);
   if (!r) return;
   document.getElementById("release-id").value = r._id;
   document.getElementById("release-artist").value = r.artistId;
@@ -489,7 +541,7 @@ window.editRelease = (id) => {
   builder.innerHTML = "";
   (r.links || []).forEach(link => createLinkRow(builder, link));
 
-  document.getElementById("release-sort").value = r.sortOrder || 0;
+  document.getElementById("release-sort").value = (r.sortOrder !== undefined && r.sortOrder !== null) ? r.sortOrder : "";
   releaseForm.classList.remove("hidden");
 };
 
@@ -497,6 +549,10 @@ newReleaseBtn.addEventListener("click", () => {
   document.getElementById("release-id").value = "";
   releaseForm.reset();
   document.getElementById("release-lowres-cover").value = "";
+  document.getElementById("release-sort").value = "";
+  if (releaseArtistFilter && releaseArtistFilter.value) {
+    document.getElementById("release-artist").value = releaseArtistFilter.value;
+  }
   const builder = document.getElementById("release-links-builder");
   builder.innerHTML = "";
   createLinkRow(builder, { label: "Spotify", className: "spotify", url: "" });
@@ -589,6 +645,9 @@ cancelReleaseBtn.addEventListener("click", () => { releaseForm.classList.add("hi
 releaseForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const id = document.getElementById("release-id").value;
+  const sortRaw = document.getElementById("release-sort").value.trim();
+  const sortOrder = sortRaw !== "" ? parseInt(sortRaw, 10) : undefined;
+
   const data = {
     token: sessionToken,
     artistId: document.getElementById("release-artist").value,
@@ -603,7 +662,7 @@ releaseForm.addEventListener("submit", async (e) => {
     stickerUrls: document.getElementById("release-stickers").value.split(",").map(s => s.trim()).filter(Boolean),
     aboutImageUrls: document.getElementById("release-about-images").value.split(",").map(s => s.trim()).filter(Boolean),
     links: getLinksFromBuilder(document.getElementById("release-links-builder")),
-    sortOrder: parseInt(document.getElementById("release-sort").value, 10) || 0,
+    sortOrder: sortOrder,
   };
   try {
     if (id) {

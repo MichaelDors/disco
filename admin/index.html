@@ -196,6 +196,19 @@
     .list-item:hover {
       background: rgba(255, 255, 255, 0.05);
     }
+
+    .reorder-btn {
+      background: rgba(255, 255, 255, 0.1) !important;
+      color: var(--text-main) !important;
+      padding: 4px 8px !important;
+      font-size: 0.8rem !important;
+      border-radius: 6px !important;
+      line-height: 1 !important;
+      min-width: 28px !important;
+    }
+    .reorder-btn:hover {
+      background: var(--primary) !important;
+    }
   </style>
 </head>
 <body>
@@ -248,7 +261,15 @@
       </div>
 
       <div id="releases-panel" class="hidden">
-        <button id="new-release-btn" style="margin-bottom: 15px;">+ New Release</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+          <button id="new-release-btn">+ New Release</button>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <label for="release-artist-filter" style="margin-bottom: 0; font-size: 0.85rem; color: var(--text-subtle);">Filter by Artist:</label>
+            <select id="release-artist-filter" style="width: auto; padding: 6px 12px; font-size: 0.9rem; margin-bottom: 0;">
+              <option value="">All Artists</option>
+            </select>
+          </div>
+        </div>
         <div id="releases-list"></div>
         <form id="release-form" class="hidden" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
           <h3>Edit Release</h3>
@@ -275,7 +296,7 @@
             <div id="release-links-builder" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px;"></div>
             <button type="button" id="add-link-btn" style="background:#34c759; color:white; padding:5px 10px; font-size:0.9rem;">+ Add Streaming Link</button>
           </div>
-          <div class="form-group"><label>Sort Order</label><input type="number" id="release-sort" value="0" /></div>
+          <div class="form-group"><label>Sort Order (Optional)</label><input type="number" id="release-sort" placeholder="Leave blank to sort by release date" /></div>
           <button type="submit">Save Release</button>
           <button type="button" id="cancel-release-btn" style="background:#ccc; color:#333;">Cancel</button>
           <p id="release-error" style="color:red;"></p>
