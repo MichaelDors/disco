@@ -147,6 +147,21 @@ const platformPresets = [
   { label: "Custom", className: "custom" },
 ];
 
+function detectPlatformFromUrl(url) {
+  if (!url) return null;
+  const lower = url.toLowerCase();
+  if (lower.includes("spotify.com")) return "spotify";
+  if (lower.includes("apple.com") || lower.includes("itunes.apple.com")) return "apple";
+  if (lower.includes("youtube.com") || lower.includes("youtu.be")) return "youtube";
+  if (lower.includes("amazon.com") || lower.includes("music.amazon")) return "amazon";
+  if (lower.includes("deezer.com") || lower.includes("deezer.page.link")) return "deezer";
+  if (lower.includes("tidal.com")) return "tidal";
+  if (lower.includes("pandora.com")) return "pandora";
+  if (lower.includes("instagram.com")) return "instagram";
+  if (lower.includes("presave") || lower.includes("feature.fm") || lower.includes("show.co") || lower.includes("laylo.com")) return "presave";
+  return null;
+}
+
 function createLinkRow(container, initialData = { label: "", className: "spotify", url: "" }) {
   const row = document.createElement("div");
   row.style.display = "flex";
@@ -217,6 +232,20 @@ function createLinkRow(container, initialData = { label: "", className: "spotify
   urlInput.style.flex = "1";
   urlInput.required = true;
   urlInput.value = initialData.url || "";
+
+  const handleUrlAutoDetect = () => {
+    const val = urlInput.value.trim();
+    const detected = detectPlatformFromUrl(val);
+    if (detected && select.value !== detected) {
+      select.value = detected;
+      select.dispatchEvent(new Event("change"));
+    }
+  };
+
+  urlInput.addEventListener("input", handleUrlAutoDetect);
+  urlInput.addEventListener("paste", () => {
+    setTimeout(handleUrlAutoDetect, 0);
+  });
 
   const removeBtn = document.createElement("button");
   removeBtn.type = "button";
